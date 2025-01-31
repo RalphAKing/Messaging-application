@@ -38,15 +38,24 @@ def load_user(user_id):
 def home():
     if current_user.is_authenticated:
         user_boards = db.user_boards.find({'user_id': ObjectId(current_user.get_id())})
-        board_ids = [board['board_id'] for board in user_boards]
+        board_ids = []
+        boards = []
+        for ub in user_boards:
+            board_ids.append(ub['board_id'])
+            board = db.boards.find_one({'_id': ub['board_id']})
+            if board:
+                boards.append(board)
+                
         posts = db.posts.find({
             'board_id': {'$in': board_ids},
             'viewed_by': {'$nin': [ObjectId(current_user.get_id())]}
         }).sort('score', -1)
     else:
+        boards = []
         posts = db.posts.find().sort('score', -1)
     
-    return render_template('home.html', posts=posts)
+    return render_template('home.html', posts=posts, boards=boards)
+
 
 @app.route('/board/<board_id>')
 def board(board_id):
@@ -88,12 +97,47 @@ def create_post():
 @app.route('/vote/<post_id>/<direction>')
 @login_required
 def vote(post_id, direction):
-    multiplier = 1 if direction == 'up' else -1
+    user_id = ObjectId(current_user.get_id())
+    post_id = ObjectId(post_id)
+    
+    # Find existing vote
+    existing_vote = db.votes.find_one({
+        'user_id': user_id,
+        'post_id': post_id
+    })
+    
+    if existing_vote:
+        if existing_vote['direction'] == direction:
+            # Remove vote if clicking same direction
+            db.votes.delete_one({'_id': existing_vote['_id']})
+            multiplier = -1 if direction == 'up' else 1
+        else:
+            # Change vote direction (counts as 2 points)
+            db.votes.update_one(
+                {'_id': existing_vote['_id']},
+                {'$set': {'direction': direction}}
+            )
+            multiplier = 2 if direction == 'up' else -2
+    else:
+        # New vote
+        db.votes.insert_one({
+            'user_id': user_id,
+            'post_id': post_id,
+            'direction': direction
+        })
+        multiplier = 1 if direction == 'up' else -1
+    
+    # Update post score
     db.posts.update_one(
-        {'_id': ObjectId(post_id)},
+        {'_id': post_id},
         {'$inc': {'score': multiplier}}
     )
-    return jsonify({'success': True})
+    
+    return jsonify({
+        'success': True,
+        'newScore': db.posts.find_one({'_id': post_id})['score']
+    })
+
 
 
 

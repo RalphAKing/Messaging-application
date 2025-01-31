@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="browse-boards">
+    <h2>Browse Boards</h2>
+    
+    {% if current_user.is_authenticated %}
+    <div class="create-board-button">
+        <a href="{{ url_for('create_board') }}" class="button">Create New Board</a>
+    </div>
+    {% endif %}
+    
+    <div class="boards-grid">
+        {% for board in boards %}
+        <div class="board-card">
+            <h3>{{ board.title }}</h3>
+            <p>{{ board.description }}</p>
+            {% if current_user.is_authenticated %}
+                {% if board._id|string not in joined_board_ids %}
+                    <a href="{{ url_for('join_board', board_id=board._id) }}" class="button">Join Board</a>
+                {% else %}
+                    <span class="joined-label">Joined</span>
+                {% endif %}
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
