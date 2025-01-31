@@ -3,12 +3,6 @@ This will be merged into RKing industries website when finished
 
 
 
-I want to make a social media like social media website that acts like redit, facebook and twitter.
-I want it to have the ability to post with each post having the username of the persn who posted it then on the same row there will be a dot then score next to it.
-Then the post title is bellow that and bellow that is the context which is html based and can contain images.
-Now after that bellow there is a replys button whith an ammount of replyes next to it, also there shoul be an like and disslike button which affects the score of the poster, the comments are below the post. when expanded and each comment follows the same layout, when entering a new level of comments it pusshes it to the left so that the current comment row is in view and to go back to previous level there is a back button that sends back to previous comment or post level. you should also be able to minimize comments. THe posts with the most likes and comments should be displayed on the front page and there should be diffrnert boards that have discriptions and titles and all of the posts on that board should be displayed whn going to that boards page, you can add a board to your boards and it will show a list fo boards on the left and you can visit them and on your home page the posts will be related to the boards you have added. onece you have viewed a post on your home page it should the next time you load it so you get new content each time but it should still be fisable by search or visting the board. People should also be able ot create boards and only be able to post on baords, the post should also have an @to the baard it was posted on next to it
-
-
 I want ot make a social media mebsite that acts like reddit, facebook and twitter.
 User should have the ability:
 - create posts
@@ -62,3 +56,38 @@ BOARD PAGE:
     - in an infinate scrolling list that requests new content insted of being sent all data at once
     - the posts should be sorted by the number of upvotes and the number of comments
 
+INDEX PAGE:
+- NONE
+
+FILE LAYOUT:
+main.py
+templates
+    - home.html
+    - board.html
+    - find_a_board.html
+static
+    - NONE
+
+
+```python
+from flask import Flask, render_template, request, redirect, session, jsonify
+from pymongo import *
+from pymongo import MongoClient
+import yaml
+from yaml.loader import SafeLoader
+
+
+
+with open('config.yaml') as f:
+    config = yaml.load(f, Loader=SafeLoader)
+
+task_statuses = {}
+
+
+def messaging():
+    cluster = MongoClient(config['mongodbaddress'], connect=False)
+    db = cluster["RKingIndustries"]
+    messagingdb = db["messaging"]
+    return messagingdb
+
+```
