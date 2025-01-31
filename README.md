@@ -90,4 +90,43 @@ def messaging():
     messagingdb = db["messaging"]
     return messagingdb
 
+
+def accounts():
+    cluster = MongoClient(config['mongodbaddress'], connect=False)
+    db = cluster["RKingIndustries"]
+    accountsdb = db["accounts"]
+    return accountsdb
+
+@app.route('/login', methods=["GET", "POST"])
+def login():
+    if 'userid' in session:
+        logged_accounts=accounts()
+        account = logged_accounts.find_one({'userid':session['userid']})
+        if account != None:
+            return redirect('/')
+        else:
+            session.pop('userid', None)
+    if request.method == 'POST':
+        logged_accounts=accounts()
+        email = (request.form['email']).lower()
+        password = request.form['password']
+
+        account = logged_accounts.find_one({'email':email})
+        if account != None:
+            if check_password_hash(account['password'], password):
+                session['userid'] = account['userid']
+                
+                return redirect('/')
+            else:
+                return render_template('login.html', error='Invalid Password')
+        else:
+            unaccounts = unverified_accounts()
+            if unaccounts.find_one({'email':email}):
+                return redirect('/verify')
+            return render_template('login.html', error='Invalid Email')
+
+    return render_template('login.html')
+
+
+
 ```
