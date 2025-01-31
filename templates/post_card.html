@@ -1,0 +1,19 @@
+<div class="post-card">
+    <div class="post-header">
+        <span class="username">{{ post.username }}</span>
+        <span class="dot">•</span>
+        <span class="score">{{ post.score }}</span>
+        <span class="board">@{{ board.title }}</span>
+    </div>
+    
+    <h2 class="post-title">{{ post.title }}</h2>
+    <div class="post-content">{{ post.content|safe }}</div>
+    
+    <div class="post-actions">
+        <button onclick="vote('{{ post._id }}', 'up')" class="vote-btn">↑</button>
+        <button onclick="vote('{{ post._id }}', 'down')" class="vote-btn">↓</button>
+        <a href="{{ url_for('post', post_id=post._id) }}" class="replies-btn">
+            Replies ({{ post.reply_count }})
+        </a>
+    </div>
+</div>

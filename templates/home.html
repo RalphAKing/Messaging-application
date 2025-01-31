@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="boards-sidebar">
+    {% if current_user.is_authenticated %}
+        <h3>Your Boards</h3>
+        {% for board in user_boards %}
+            <a href="{{ url_for('board', board_id=board._id) }}">{{ board.title }}</a>
+        {% endfor %}
+    {% endif %}
+</div>
+
+<div class="posts-container">
+    {% for post in posts %}
+        {% include 'post_card.html' %}
+    {% endfor %}
+</div>
+{% endblock %}

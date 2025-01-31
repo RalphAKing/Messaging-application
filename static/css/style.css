@@ -1,0 +1,124 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    display: flex;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.boards-sidebar {
+    width: 200px;
+    padding-right: 20px;
+}
+
+.posts-container {
+    flex: 1;
+}
+
+.post-card {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.post-header {
+    margin-bottom: 10px;
+}
+
+.username {
+    font-weight: bold;
+}
+
+.dot {
+    margin: 0 5px;
+}
+
+.score {
+    color: #666;
+}
+
+.post-title {
+    margin: 10px 0;
+}
+
+.post-content {
+    margin-bottom: 15px;
+}
+
+.post-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.vote-btn {
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+.replies-btn {
+    text-decoration: none;
+    color: #666;
+}
+
+.auth-form {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.auth-form button {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.auth-form button:hover {
+    background-color: #0056b3;
+}
+
+.create-post-form {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.create-post-form textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    resize: vertical;
+}
+
+.create-post-form select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
