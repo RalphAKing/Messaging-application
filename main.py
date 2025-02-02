@@ -79,8 +79,39 @@ def index():
 
 
 
+@app.route('/home')
+def home():
+    if 'userid' in session:
+        logged_accounts=accounts()
+        account = logged_accounts.find_one({'userid':session['userid']})
+        if account == None:
+            session.pop('userid', None)
+        else:
+            return render_template('home.html', loggedin=True)
+    return render_template('home.html')
 
 
+@app.route('/board/<board_id>')
+def board(board_id):
+    if 'userid' in session:
+        logged_accounts=accounts()
+        account = logged_accounts.find_one({'userid':session['userid']})
+        if account == None:
+            session.pop('userid', None)
+        else:
+            return render_template('board.html', loggedin=True)
+    return render_template('board.html')
+
+@app.route('/findboard')
+def find_a_board():
+    if 'userid' in session:
+        logged_accounts=accounts()
+        account = logged_accounts.find_one({'userid':session['userid']})
+        if account == None:
+            session.pop('userid', None)
+        else:
+            return render_template('find_a_board.html', loggedin=True)
+    return render_template('find_a_board.html')
 
 
 
