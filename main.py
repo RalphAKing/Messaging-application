@@ -161,72 +161,77 @@ def updown():
         
         data = request.get_json()
         direction = data.get('direction')
-        messageid = data.get('messageid')
+        message_chain = data.get('messageChain')
         
-        if not direction or not messageid:
+        if not direction or not message_chain:
             return jsonify({'success': False, 'error': 'Invalid data'})
             
         message_data = messages()
-        message = message_data.find_one({'messageid': messageid})
+        current_message = message_data.find_one({'messageid': message_chain[0]})
         
-        if message:
-            author = logged_accounts.find_one({'userid': message['owner']})
-            
-            if 'voted_by' not in message:
-                message['voted_by'] = {'up': [], 'down': []}
-            
-            user_id = account['userid']
-            score_change = 0
-            voted = False
-            
-            if direction == 'up':
-                if user_id in message['voted_by']['up']:
-                    message['voted_by']['up'].remove(user_id)
-                    message['upvotes'] -= 1
-                    score_change = -1
-                    voted = False
-                else:
-                    if user_id in message['voted_by']['down']:
-                        message['voted_by']['down'].remove(user_id)
-                        message['downvotes'] -= 1
-                        score_change += 1
-                    message['voted_by']['up'].append(user_id)
-                    message['upvotes'] += 1
+        # Navigate through the chain to find the target message/reply
+        target = current_message
+        for i in range(1, len(message_chain)):
+            for comment in target['comments']:
+                if comment['messageid'] == message_chain[i]:
+                    target = comment
+                    break
+        
+        author = logged_accounts.find_one({'userid': target['owner']})
+        user_id = account['userid']
+        score_change = 0
+        voted = False
+        
+        if 'voted_by' not in target:
+            target['voted_by'] = {'up': [], 'down': []}
+        
+        if direction == 'up':
+            if user_id in target['voted_by']['up']:
+                target['voted_by']['up'].remove(user_id)
+                target['upvotes'] -= 1
+                score_change = -1
+                voted = False
+            else:
+                if user_id in target['voted_by']['down']:
+                    target['voted_by']['down'].remove(user_id)
+                    target['downvotes'] -= 1
                     score_change += 1
-                    voted = True
-                    
-            elif direction == 'down':
-                if user_id in message['voted_by']['down']:
-                    message['voted_by']['down'].remove(user_id)
-                    message['downvotes'] -= 1
-                    score_change = 1
-                    voted = False
-                else:
-                    if user_id in message['voted_by']['up']:
-                        message['voted_by']['up'].remove(user_id)
-                        message['upvotes'] -= 1
-                        score_change -= 1
-                    message['voted_by']['down'].append(user_id)
-                    message['downvotes'] += 1
+                target['voted_by']['up'].append(user_id)
+                target['upvotes'] += 1
+                score_change += 1
+                voted = True
+                
+        elif direction == 'down':
+            if user_id in target['voted_by']['down']:
+                target['voted_by']['down'].remove(user_id)
+                target['downvotes'] -= 1
+                score_change = 1
+                voted = False
+            else:
+                if user_id in target['voted_by']['up']:
+                    target['voted_by']['up'].remove(user_id)
+                    target['upvotes'] -= 1
                     score_change -= 1
-                    voted = True
-            
-            message_data.replace_one({'messageid': messageid}, message)
-            
-            if author and score_change != 0:
-                if 'score' not in author:
-                    author['score'] = 0
-                author['score'] += score_change
-                logged_accounts.replace_one({'userid': author['userid']}, author)
-            
-            return jsonify({
-                'success': True,
-                'upvotes': message['upvotes'],
-                'downvotes': message['downvotes'],
-                'voted': voted,
-                'author_score': author['score']
-            })
-
+                target['voted_by']['down'].append(user_id)
+                target['downvotes'] += 1
+                score_change -= 1
+                voted = True
+        
+        message_data.replace_one({'messageid': message_chain[0]}, current_message)
+        
+        if author and score_change != 0:
+            if 'score' not in author:
+                author['score'] = 0
+            author['score'] += score_change
+            logged_accounts.replace_one({'userid': author['userid']}, author)
+        
+        return jsonify({
+            'success': True,
+            'upvotes': target['upvotes'],
+            'downvotes': target['downvotes'],
+            'voted': voted,
+            'author_score': author['score']
+        })
             
     return jsonify({'success': False, 'error': 'Not logged in'})
 
@@ -295,6 +300,99 @@ def find_a_board():
             return render_template('find_a_board.html', loggedin=True)
     return render_template('find_a_board.html')
 
+
+@app.route('/post/<messageid>')
+def post(messageid):
+    if 'userid' in session:
+        logged_accounts = accounts()
+        account = logged_accounts.find_one({'userid': session['userid']})
+        if account is None:
+            session.pop('userid', None)
+            return redirect('/login')
+        
+        message_data = messages()
+        post = message_data.find_one({'messageid': messageid})
+        
+        if post:
+            author = logged_accounts.find_one({'userid': post['owner']})
+            post['author_name'] = author['username']
+            post['author_score'] = author.get('score', 0)
+            return render_template('post.html', 
+                                loggedin=True, 
+                                message=post,
+                                username=account['username'])
+    
+    return redirect('/login')
+
+@app.route('/replies/<messageid>')
+def get_replies(messageid):
+    message_data = messages()
+    parent_chain = request.args.get('chain', '').split(',')
+    message = message_data.find_one({'messageid': parent_chain[0]})
+    
+    if message:
+        current = message
+        for chain_id in parent_chain[1:]:
+            for comment in current['comments']:
+                if comment['messageid'] == chain_id:
+                    current = comment
+                    break
+        
+        logged_accounts = accounts()
+        replies = []
+        
+        if 'comments' in current:
+            for reply in current['comments']:
+                author = logged_accounts.find_one({'userid': reply['owner']})
+                reply['author_name'] = author['username']
+                reply['author_score'] = author.get('score', 0)
+                replies.append(reply)
+                
+        return jsonify(replies)
+    return jsonify([])
+
+
+@app.route('/reply', methods=['POST'])
+def add_reply():
+    if 'userid' not in session:
+        return jsonify({'success': False, 'error': 'Not logged in'})
+        
+    data = request.get_json()
+    parent_id = data.get('parent_id')
+    content = data.get('content')
+    parent_chain = data.get('parent_chain', [])
+
+    
+    message_data = messages()
+    logged_accounts = accounts()
+    account = logged_accounts.find_one({'userid': session['userid']})
+    
+    reply = {
+        'messageid': str(uuid.uuid4()),
+        'content': content,
+        'owner': account['userid'],
+        'date': datetime.now(),
+        'upvotes': 0,
+        'downvotes': 0,
+        'comments': [],
+        'voted_by': {'up': [], 'down': []}
+    }
+    
+    message = message_data.find_one({'messageid': parent_chain[0]})
+    current = message
+    for chain_id in parent_chain[1:]:
+        for comment in current['comments']:
+            if comment['messageid'] == chain_id:
+                current = comment
+                break
+    current['comments'].append(reply)
+    
+    result = message_data.replace_one({'messageid': parent_chain[0]}, message)
+    
+    reply['author_name'] = account['username']
+    reply['author_score'] = account.get('score', 0)
+    
+    return jsonify({'success': True, 'reply': reply})
 
 
 
