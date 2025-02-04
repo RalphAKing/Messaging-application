@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="../static/logo.png" type="image/icon type">
+    <title>Sign Up - RKing Industries</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #f8fafc;
+        }
+
+        .container {
+            max-width: 700px;
+            width: 100%;
+            margin: 20px auto;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #f8fafc;
+            margin-bottom: 35px;
+            font-size: 36px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-group {
+            margin-bottom: 28px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #f8fafc;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #f8fafc;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-group small {
+            display: block;
+            margin-top: 8px;
+            color: #cbd5e1;
+            font-size: 13px;
+            font-style: italic;
+        }
+
+        .error-message {
+            background: #fff5f5;
+            color: #e74c3c;
+            padding: 15px 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            font-size: 14px;
+            border-left: 5px solid #e74c3c;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .submit-btn:disabled {
+            background: linear-gradient(135deg, #bdc3c7 0%, #95a5a6 100%);
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 16px 32px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 15px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(52, 152, 219, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: translateY(-1px);
+        }
+
+        p {
+            text-align: center;
+            margin-top: 30px;
+            color: #f8fafc;
+            font-size: 15px;
+        }
+
+        a {
+            color: #60a5fa;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        a:hover {
+            color: #3b82f6;
+            text-decoration: underline;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 25px;
+            margin-bottom: 28px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 25px;
+            }
+
+            .form-row {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            h2 {
+                font-size: 28px;
+            }
+        }
+
+    .requirements-list {
+        list-style: none;
+        padding-left: 0;
+        margin-top: 10px;
+    }
+
+    .requirements-list li {
+        color: #cbd5e1;
+        font-size: 12px;
+        margin-bottom: 5px;
+        padding-left: 20px;
+        position: relative;
+    }
+
+    .requirements-list li::before {
+        content: '✕';
+        position: absolute;
+        left: 0;
+        color: #e74c3c;
+    }
+
+    .requirements-list li.valid {
+        color: #2ecc71;
+    }
+
+    .requirements-list li.valid::before {
+        content: '✓';
+        color: #2ecc71;
+    }
+
+    .invalid-input {
+        border-color: #e74c3c !important;
+        box-shadow: 0 0 0 4px rgba(231, 76, 60, 0.1) !important;
+    }
+    .checkbox-container {
+        color: #f8fafc;
+    }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h2>Join RKing Industries</h2>
+        
+        {% if error %}
+        <div class="error-message">{{ error }}</div>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('signup') }}">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="firstname">First Name</label>
+                    <input type="text" id="firstname" name="firstname" required placeholder="Enter your first name">
+                </div>
+
+                <div class="form-group">
+                    <label for="lastname">Last Name</label>
+                    <input type="text" id="lastname" name="lastname" required placeholder="Enter your last name">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" required placeholder="Enter your email">
+            </div>
+
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required placeholder="Choose a username">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required placeholder="Create a password">
+                <small>Password requirements:</small>
+                <ul id="password-requirements" class="requirements-list">
+                    <li id="length-check">At least 8 characters</li>
+                    <li id="digit-check">At least one number</li>
+                    <li id="uppercase-check">At least one uppercase letter</li>
+                    <li id="lowercase-check">At least one lowercase letter</li>
+                    <li id="symbol-check">At least one special character</li>
+                </ul>
+            </div>
+
+            <div class="form-group">
+                <label for="retypepassword">Confirm Password</label>
+                <input type="password" id="retypepassword" name="retypepassword" required placeholder="Confirm your password">
+            </div>
+
+            <div class="checkbox-container">
+                <input type="checkbox" id="accept_privacy" name="accept_privacy" required>
+                <label for="accept_privacy">I accept the <a href="/privacy" target="_blank">Privacy Policy</a></label>
+            </div>
+            
+            <div class="checkbox-container">
+                <input type="checkbox" id="accept_tos" name="accept_tos" required>
+                <label for="accept_tos">I accept the <a href="/tos" target="_blank">Terms of Service</a></label>
+            </div>
+
+            <button type="submit" class="submit-btn">Create Account</button>
+        </form>
+
+        <p>Already have an account? <a href="{{ url_for('login') }}">Sign in</a></p>
+    </div>
+</body>
+</html>
+
+<script>
+    const form = document.querySelector('form');
+    const password = document.getElementById('password');
+    const retypePassword = document.getElementById('retypepassword');
+    const submitBtn = document.querySelector('.submit-btn');
+
+    function validatePassword(password) {
+        const conditions = {
+            length: password.length >= 8,
+            digit: /\d/.test(password),
+            uppercase: /[A-Z]/.test(password),
+            lowercase: /[a-z]/.test(password),
+            symbol: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+        };
+
+        document.getElementById('length-check').classList.toggle('valid', conditions.length);
+        document.getElementById('digit-check').classList.toggle('valid', conditions.digit);
+        document.getElementById('uppercase-check').classList.toggle('valid', conditions.uppercase);
+        document.getElementById('lowercase-check').classList.toggle('valid', conditions.lowercase);
+        document.getElementById('symbol-check').classList.toggle('valid', conditions.symbol);
+
+        const allConditionsMet = Object.values(conditions).every(condition => condition);
+        password.classList.toggle('invalid-input', !allConditionsMet);
+
+        return allConditionsMet;
+    }
+
+    function validatePasswords() {
+        const passwordsMatch = password.value === retypePassword.value;
+        const passwordValid = validatePassword(password.value);
+
+        if (!passwordsMatch) {
+            retypePassword.setCustomValidity('Passwords do not match');
+            retypePassword.classList.add('invalid-input');
+        } else {
+            retypePassword.setCustomValidity('');
+            retypePassword.classList.remove('invalid-input');
+        }
+
+        submitBtn.disabled = !passwordsMatch || !passwordValid;
+    }
+
+    password.addEventListener('input', validatePasswords);
+    retypePassword.addEventListener('input', validatePasswords);
+
+    validatePasswords();
+</script>

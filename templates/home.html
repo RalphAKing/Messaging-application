@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home - Messaging Application</title>
+    <style>
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .board-form, .message-form, .boards-list, .top-posts {
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .post-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .vote-section {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .dot {
+            margin: 0 8px;
+        }
+        
+        .board-link {
+            color: #1a73e8;
+            text-decoration: none;
+        }
+        
+        .post-content {
+            margin: 12px 0;
+            font-size: 16px;
+            line-height: 1.4;
+        }
+        
+        .post-footer {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 12px;
+        }
+        
+        .vote-btn, .action-btn {
+            background: none;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .vote-btn:hover, .action-btn:hover {
+            background: #f5f5f5;
+        }
+        
+        .date {
+            margin-left: auto;
+            color: #666;
+            font-size: 12px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome, {{ username }}</h1>
+
+        <div class="boards-list">
+            <h2>Your Boards</h2>
+            {% if boards %}
+                {% for board in boards %}
+                    <div class="post-card">
+                        <h3>{{ board.name }}</h3>
+                        <p>{{ board.description }}</p>
+                        {% if board.owner == session.userid %}
+                            <span>(Owner)</span>
+                        {% else %}
+                            <span>(Member)</span>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>You haven't joined any boards yet.</p>
+            {% endif %}
+        </div>
+
+        <div class="top-posts">
+            <h2>Top Posts of the Day</h2>
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="post-card">
+                        <div class="post-header">
+                            <div class="author-info">
+                                <span class="author">{{ message.author_name }}</span>
+                                <span class="dot">•</span>
+                                <span class="score">{{ message.author_score }}</span>
+                                <span class="dot">•</span>
+                                <a href="/board/{{ message.board }}" class="board-link">{{ message.board }}</a>
+                            </div>                            
+                        </div>
+                        <div class="post-content">
+                            {{ message.content }}
+                        </div>
+                        <div class="post-footer">
+                            <button class="vote-btn upvote">⬆ {{ message.upvotes }}</button>
+                            <button class="vote-btn downvote">⬇ {{ message.downvotes }}</button>
+                            <button class="action-btn reply">💬 Reply</button>
+                            <button class="action-btn share">↗ Share</button>
+                            <span class="date">{{ message.date.strftime('%Y-%m-%d %H:%M') }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No posts yet today.</p>
+            {% endif %}
+        </div>        
+
+        <div class="board-form">
+            <h2>Create New Board</h2>
+            <form action="/createboard" method="POST">
+                <div class="form-group">
+                    <label for="board-name">Board Name:</label>
+                    <input type="text" id="board-name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="board-description">Description:</label>
+                    <textarea id="board-description" name="description" rows="4" required></textarea>
+                </div>
+                <button type="submit">Create Board</button>
+            </form>
+        </div>
+
+        <div class="message-form">
+            <h2>Create New Message</h2>
+            <form action="/createmessage" method="POST">
+                <div class="form-group">
+                    <label for="board-select">Select Board:</label>
+                    <select id="board-select" name="boardname" required>
+                        {% for board in boards %}
+                            <option value="{{ board.name }}">{{ board.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>                
+                <div class="form-group">
+                    <label for="message-content">Message Content:</label>
+                    <textarea id="message-content" name="content" rows="6" required></textarea>
+                </div>
+                <button type="submit">Post Message</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
