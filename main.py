@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session, jsonify
+from flask import Flask, render_template, request, redirect, session, jsonify, send_from_directory
 from pymongo import MongoClient
 import yaml
 from yaml.loader import SafeLoader
@@ -149,6 +149,87 @@ def createmessage():
 
                 return redirect('/home')
     return redirect('/login')
+
+
+@app.route('/updown', methods=["POST"])
+def updown():
+    if 'userid' in session:
+        logged_accounts = accounts()
+        account = logged_accounts.find_one({'userid': session['userid']})
+        if account is None:
+            return jsonify({'success': False, 'error': 'Not logged in'})
+        
+        data = request.get_json()
+        direction = data.get('direction')
+        messageid = data.get('messageid')
+        
+        if not direction or not messageid:
+            return jsonify({'success': False, 'error': 'Invalid data'})
+            
+        message_data = messages()
+        message = message_data.find_one({'messageid': messageid})
+        
+        if message:
+            author = logged_accounts.find_one({'userid': message['owner']})
+            
+            if 'voted_by' not in message:
+                message['voted_by'] = {'up': [], 'down': []}
+            
+            user_id = account['userid']
+            score_change = 0
+            voted = False
+            
+            if direction == 'up':
+                if user_id in message['voted_by']['up']:
+                    message['voted_by']['up'].remove(user_id)
+                    message['upvotes'] -= 1
+                    score_change = -1
+                    voted = False
+                else:
+                    if user_id in message['voted_by']['down']:
+                        message['voted_by']['down'].remove(user_id)
+                        message['downvotes'] -= 1
+                        score_change += 1
+                    message['voted_by']['up'].append(user_id)
+                    message['upvotes'] += 1
+                    score_change += 1
+                    voted = True
+                    
+            elif direction == 'down':
+                if user_id in message['voted_by']['down']:
+                    message['voted_by']['down'].remove(user_id)
+                    message['downvotes'] -= 1
+                    score_change = 1
+                    voted = False
+                else:
+                    if user_id in message['voted_by']['up']:
+                        message['voted_by']['up'].remove(user_id)
+                        message['upvotes'] -= 1
+                        score_change -= 1
+                    message['voted_by']['down'].append(user_id)
+                    message['downvotes'] += 1
+                    score_change -= 1
+                    voted = True
+            
+            message_data.replace_one({'messageid': messageid}, message)
+            
+            if author and score_change != 0:
+                if 'score' not in author:
+                    author['score'] = 0
+                author['score'] += score_change
+                logged_accounts.replace_one({'userid': author['userid']}, author)
+            
+            return jsonify({
+                'success': True,
+                'upvotes': message['upvotes'],
+                'downvotes': message['downvotes'],
+                'voted': voted,
+                'author_score': author['score']
+            })
+
+            
+    return jsonify({'success': False, 'error': 'Not logged in'})
+
 
 
 

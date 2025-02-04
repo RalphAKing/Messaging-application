@@ -88,6 +88,12 @@
             font-size: 12px;
         }
 
+        .vote-btn.active {
+            background-color: #e8f0fe;
+            color: #1a73e8;
+            border-color: #1a73e8;
+        }
+
     </style>
 </head>
 <body>
@@ -117,12 +123,13 @@
             <h2>Top Posts of the Day</h2>
             {% if messages %}
                 {% for message in messages %}
-                    <div class="post-card">
+                    <div class="post-card" data-messageid="{{ message.messageid }}">
+
                         <div class="post-header">
                             <div class="author-info">
                                 <span class="author">{{ message.author_name }}</span>
                                 <span class="dot">•</span>
-                                <span class="score">{{ message.author_score }}</span>
+                                <span class="author-score" data-userid="{{ message.owner }}">{{ message.author_score }}</span>
                                 <span class="dot">•</span>
                                 <a href="/board/{{ message.board }}" class="board-link">{{ message.board }}</a>
                             </div>                            
@@ -178,5 +185,62 @@
             </form>
         </div>
     </div>
+
+<script>
+document.querySelectorAll('.vote-btn').forEach(button => {
+    button.addEventListener('click', async function() {
+        const direction = this.classList.contains('upvote') ? 'up' : 'down';
+        const messageCard = this.closest('.post-card');
+        const messageid = messageCard.dataset.messageid;
+        
+        const upvoteCount = this.classList.contains('upvote') ? this : messageCard.querySelector('.upvote');
+        const downvoteCount = this.classList.contains('downvote') ? this : messageCard.querySelector('.downvote');
+        const authorScore = messageCard.querySelector('.author-score');
+        
+        const response = await fetch('/updown', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                direction: direction,
+                messageid: messageid
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            upvoteCount.innerHTML = `⬆ ${data.upvotes}`;
+            downvoteCount.innerHTML = `⬇ ${data.downvotes}`;
+            authorScore.textContent = data.author_score;
+            
+            const authorId = authorScore.dataset.userid;
+            document.querySelectorAll(`.author-score[data-userid="${authorId}"]`).forEach(score => {
+                score.textContent = data.author_score;
+            });
+            
+            if (direction === 'up') {
+                if (data.voted) {
+                    upvoteCount.classList.add('active');
+                    downvoteCount.classList.remove('active');
+                } else {
+                    upvoteCount.classList.remove('active');
+                }
+            } else {
+                if (data.voted) {
+                    downvoteCount.classList.add('active');
+                    upvoteCount.classList.remove('active');
+                } else {
+                    downvoteCount.classList.remove('active');
+                }
+            }
+        }
+    });
+});
+</script>
+
+
+
 </body>
 </html>
