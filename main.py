@@ -169,7 +169,6 @@ def updown():
         message_data = messages()
         current_message = message_data.find_one({'messageid': message_chain[0]})
         
-        # Navigate through the chain to find the target message/reply
         target = current_message
         for i in range(1, len(message_chain)):
             for comment in target['comments']:
@@ -288,6 +287,57 @@ def board(board_id):
         else:
             return render_template('board.html', loggedin=True)
     return render_template('board.html')
+
+@app.route('/board/<boardName>/details', methods=['GET'])
+def board_details(boardName):
+    board_data = boards()
+    board = board_data.find_one({'name': boardName})
+    if board:
+        board['_id'] = str(board['_id'])
+        return jsonify({
+            'name': board.get('name'),
+            'description': board.get('description'),
+            'owner': board.get('owner'),
+            'members': board.get('members', [])
+        })
+    else:
+        return jsonify({'error': 'Board not found'}), 404
+
+@app.route('/board/<boardName>/messages', methods=['GET'])
+def board_messages(boardName):
+    message_data = messages()
+    logged_accounts = accounts()  
+    msgs = list(message_data.find({'board': boardName}))
+    output = []
+    for msg in msgs:
+        if isinstance(msg.get('date'), datetime):
+            msg['date'] = msg['date'].isoformat()
+        author = logged_accounts.find_one({'userid': msg['owner']})
+        msg['author_name'] = author['username'] if author else 'Unknown'
+        msg['author_score'] = author.get('score', 0) if author else 0
+        msg['_id'] = str(msg['_id'])
+        output.append(msg)
+    return jsonify(output)
+
+@app.route('/board/<boardName>/join', methods=['POST'])
+def join_board(boardName):
+    if 'userid' not in session:
+        return jsonify({'success': False, 'error': 'Not logged in'}), 401
+
+    user_id = session['userid']
+    board_data = boards()
+    board = board_data.find_one({'name': boardName})
+    if not board:
+        return jsonify({'success': False, 'error': 'Board not found'}), 404
+
+    if user_id == board.get('owner'):
+         return jsonify({'success': True, 'message': 'You own this board'})
+    elif user_id in board.get('members', []):
+         return jsonify({'success': True, 'message': 'You are already a member'})
+    board_data.update_one({'name': boardName}, {'$push': {'members': user_id}})
+    return jsonify({'success': True, 'message': 'You are now a member'})
+
+
 
 @app.route('/findboard')
 def find_a_board():

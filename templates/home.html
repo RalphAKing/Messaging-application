@@ -504,7 +504,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Keep existing share button functionality
 document.querySelectorAll('.share').forEach(button => {
     button.addEventListener('click', async function() {
         const messageCard = this.closest('.post-card');
@@ -535,7 +534,6 @@ function closeModal(modalId) {
     document.getElementById(modalId).style.display = 'none';
 }
 
-// Close modal when clicking outside
 window.onclick = function(event) {
     if (event.target.classList.contains('modal')) {
         event.target.style.display = 'none';

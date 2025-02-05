@@ -1,16 +1,36 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Post - Messaging Application</title>
     <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
         .container {
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
         }
+        header {
+            background-color: #1e1e1e;
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+            color: white;
+        }
+        header a {
+            color: #1a73e8;
+            text-decoration: none;
+        }
         .post-card {
-            background: white;
-            border: 1px solid #e0e0e0;
+            background: #1e1e1e;
+            border: 1px solid #333;
             border-radius: 8px;
             padding: 16px;
             margin-bottom: 16px;
@@ -20,10 +40,13 @@
             justify-content: space-between;
             margin-bottom: 10px;
         }
-        .vote-section {
+        .author-info {
             display: flex;
-            gap: 10px;
-            margin-top: 10px;
+            align-items: center;
+        }
+        .author {
+            font-weight: bold;
+            margin-right: 8px;
         }
         .dot {
             margin: 0 8px;
@@ -45,64 +68,64 @@
         }
         .vote-btn, .action-btn {
             background: none;
-            border: 1px solid #e0e0e0;
+            border: 1px solid #666;
             border-radius: 4px;
             padding: 4px 8px;
             cursor: pointer;
-            color: #666;
+            color: #e0e0e0;
         }
         .vote-btn:hover, .action-btn:hover {
-            background: #f5f5f5;
-        }
-        .date {
-            margin-left: auto;
-            color: #666;
-            font-size: 12px;
+            background: #333;
         }
         .vote-btn.active {
-            background-color: #e8f0fe;
-            color: #1a73e8;
+            background-color: #1a73e8;
+            color: white;
             border-color: #1a73e8;
         }
         .back-button {
             margin-bottom: 20px;
             padding: 8px 16px;
-            background-color: #f0f0f0;
+            background-color: #333;
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            color: white;
+        }
+        .back-button a {
+            color: white;
+            text-decoration: none;
         }
         .replies-container {
             margin-left: 20px;
-            border-left: 2px solid #e0e0e0;
+            border-left: 2px solid #666;
             padding-left: 20px;
             margin-bottom: 20px;
         }
         .new-reply-button {
-            background-color: #f8f9fa;
-            border: 1px solid #e0e0e0;
+            background-color: #333;
+            border: 1px solid #666;
             padding: 8px 16px;
             margin: 10px 0;
             border-radius: 4px;
             cursor: pointer;
             width: 100%;
+            color: white;
         }
         .new-reply-button:hover {
-            background-color: #e9ecef;
+            background-color: #444;
         }
         .reply-form-container {
             margin-top: 10px;
-        }
-        .reply-form {
-            margin: 10px 0;
         }
         .reply-input {
             width: 100%;
             min-height: 80px;
             margin-bottom: 10px;
             padding: 8px;
-            border: 1px solid #e0e0e0;
+            border: 1px solid #666;
             border-radius: 4px;
+            background-color: #333;
+            color: white;
         }
         .submit-reply {
             background-color: #1a73e8;
@@ -112,9 +135,12 @@
             border-radius: 4px;
             cursor: pointer;
         }
+        .submit-reply:hover {
+            background-color: #0c59a1;
+        }
         .action-btn.active {
-            background-color: #e8f0fe;
-            color: #1a73e8;
+            background-color: #1a73e8;
+            color: white;
             border-color: #1a73e8;
         }
         .share.active {
@@ -122,12 +148,19 @@
             color: white;
             border-color: #4CAF50;
         }
+        .date {
+            margin-left: auto;
+            color: #999;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
+    <header>
         <button class="back-button" onclick="window.history.back()">← Back</button>
         <button class="back-button"><a href="/home" class="board-link">Home</a></button>
+    </header>
+    <div class="container">
         
         <div class="post-card" data-messageid="{{ message.messageid }}" data-chain="{{ message.messageid }}">
             <div class="post-header">
@@ -139,9 +172,7 @@
                     <a href="/board/{{ message.board }}" class="board-link">{{ message.board }}</a>
                 </div>                            
             </div>
-            <div class="post-content">
-                {{ message.content }}
-            </div>
+            <div class="post-content">{{ message.content|safe }}</div>
             <div class="post-footer">
                 <button class="vote-btn upvote">⬆ {{ message.upvotes }}</button>
                 <button class="vote-btn downvote">⬇ {{ message.downvotes }}</button>
@@ -151,7 +182,6 @@
             </div>
         </div>
     </div>
-
     <script>
         function attachVoteHandlers(element) {
             element.querySelectorAll('.vote-btn').forEach(button => {
