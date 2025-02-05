@@ -252,6 +252,12 @@ def home():
             {'members': account['userid']}
         ]}))
 
+        not_user_boards = list(board_data.find({'$nor': [
+            {'owner': account['userid']},
+            {'members': account['userid']}
+        ]}))
+
+
         message_data = messages()
         today = datetime.now() - timedelta(days=1)
         top_posts = list(message_data.find({
@@ -269,6 +275,7 @@ def home():
         return render_template('home.html', 
                              loggedin=True, 
                              boards=user_boards, 
+                             not_user_boards=not_user_boards,
                              messages=top_posts,
                              username=account['username'])
     
@@ -336,19 +343,6 @@ def join_board(boardName):
          return jsonify({'success': True, 'message': 'You are already a member'})
     board_data.update_one({'name': boardName}, {'$push': {'members': user_id}})
     return jsonify({'success': True, 'message': 'You are now a member'})
-
-
-
-@app.route('/findboard')
-def find_a_board():
-    if 'userid' in session:
-        logged_accounts=accounts()
-        account = logged_accounts.find_one({'userid':session['userid']})
-        if account == None:
-            session.pop('userid', None)
-        else:
-            return render_template('find_a_board.html', loggedin=True)
-    return redirect('/login')
 
 
 @app.route('/post/<messageid>')

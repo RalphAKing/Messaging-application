@@ -240,6 +240,20 @@
                     {% endif %}
                 </div>
             </div>
+            <div class="boards-dropdown">
+                <button class="dropdown-btn">Find Boards ▼</button>
+                <div class="dropdown-content">
+                    {% if not_user_boards %}
+                        {% for board in not_user_boards %}
+                            <a href="board/{{ board.name }}" class="dropdown-item">
+                                {{ board.name }}
+                            </a>
+                        {% endfor %}
+                    {% else %}
+                        <div class="dropdown-item">No boards available</div>
+                    {% endif %}
+                </div>
+            </div>
         </div>
         <div class="header-buttons">
             <span><button class="header-button" onclick="openModal('postModal')">Create New Post</button></span>
