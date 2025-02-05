@@ -348,7 +348,7 @@ def find_a_board():
             session.pop('userid', None)
         else:
             return render_template('find_a_board.html', loggedin=True)
-    return render_template('find_a_board.html')
+    return redirect('/login')
 
 
 @app.route('/post/<messageid>')
