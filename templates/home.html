@@ -353,19 +353,23 @@
         }
 
         document.addEventListener("DOMContentLoaded", function () {
-            const dropdownBtn = document.querySelector(".dropdown-btn");
-            const dropdownContent = document.querySelector(".dropdown-content");
+            document.querySelectorAll('.boards-dropdown').forEach(dropdown => {
+                const btn = dropdown.querySelector('.dropdown-btn');
+                const content = dropdown.querySelector('.dropdown-content');
 
-            dropdownBtn.addEventListener("click", function (event) {
-                event.stopPropagation();
-                const isOpen = dropdownContent.style.display === "block";
-                dropdownContent.style.display = isOpen ? "none" : "block";
-            });
-
-            document.addEventListener("click", function (event) {
-                if (!dropdownBtn.contains(event.target) && !dropdownContent.contains(event.target)) {
-                    dropdownContent.style.display = "none";
-                }
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const isOpen = content.style.display === 'block';
+                    document.querySelectorAll('.dropdown-content').forEach(d => {
+                        d.style.display = 'none';
+                    });
+                    content.style.display = isOpen ? 'none' : 'block';
+                });
+                document.addEventListener('click', (e) => {
+                    if (!dropdown.contains(e.target)) {
+                        content.style.display = 'none';
+                    }
+                });
             });
         });
 
